@@ -29,4 +29,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-  
+          push: true
+          tags: |
+            james58899/musicbot:latest
+            ghcr.io/james5889
