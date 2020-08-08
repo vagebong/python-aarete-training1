@@ -32,4 +32,4 @@ jobs:
           push: true
           tags: |
             james58899/musicbot:latest
-            ghcr.io/james5889
+            ghcr.io/james58899/musicbot:latest
