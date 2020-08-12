@@ -17,4 +17,13 @@ on:
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "master" ]
-  sch
+  schedule:
+    - cron: '40 15 * * 0'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      
