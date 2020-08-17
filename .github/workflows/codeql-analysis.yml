@@ -55,4 +55,5 @@ jobs:
         # queries: security-extended,security-and-quality
 
 
-    # Autobuild attempts to bui
+    # Autobuild attempts to build any compiled languages  (C/C++, C#, Go, or Java).
+    # If this step fails, then you should remove
