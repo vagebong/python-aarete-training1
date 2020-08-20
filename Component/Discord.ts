@@ -214,3 +214,83 @@ export class Discord {
             void msg.channel.createMessage(MESSAGE_NOTHING_PLAYING);
         }
     }
+
+    private async commandRegister(msg: Message, args: string[]) {
+        if (args[0]) {
+            try {
+                await this.user.createFromToken(args[0], { type: BIND_TYPE, id: msg.author.id });
+            } catch (error) {
+                void msg.channel.createMessage(error.message as string);
+                return;
+            }
+        } else {
+            await this.user.create(msg.author.username, { type: BIND_TYPE, id: msg.author.id });
+        }
+
+        const user = (await this.user.getFromBind(BIND_TYPE, msg.author.id))!;
+        void msg.channel.createMessage(`ID: ${user._id}\nName: ${user.name}\nBind: ${user.bind.map(i => `${i.type}(${i.id})`).join(", ")}`);
+    }
+
+    private async commandBind(msg: Message) {
+        const user = await this.user.getFromBind(BIND_TYPE, msg.author.id);
+
+        if (!user) {
+            void this.bot.createMessage(msg.channel.id, "You are not register!");
+            return;
+        }
+
+        void this.bot.createMessage(msg.channel.id, `Register token: ${this.user.createBindToken(user._id)}\nExpires after one hour`);
+    }
+
+    // @ts-ignore: TODO
+    private async procseeFile(msg: Message) {
+        const user = await this.user.getFromBind(BIND_TYPE, msg.author.id);
+
+        if (!user) return;
+
+        msg.attachments.forEach(async file => {
+            let audio: WithId<IAudioData>;
+            try {
+                audio = await this.audio.add(user._id, file.url);
+            } catch (error) {
+                if (error === ERR_NOT_AUDIO) return;
+                if (error === ERR_MISSING_TITLE) audio = await this.audio.add(user._id, file.url, { title: file.filename }); else throw error;
+            }
+
+            void msg.channel.createMessage(`ID: ${audio._id}\nTitle: ${audio.title}`);
+        });
+    }
+
+    private async play(voice: VoiceConnection, status: IPlayingStatus) {
+        if (!voice.ready) return;
+
+        const audio = await this.audio.get(status.list.audio[status.index]);
+        if (!audio) throw ERR_CAN_NOT_GET_AUDIO;
+        const file = await this.audio.getFile(audio);
+        if (!file) throw ERR_MISSING_AUDIO_FILE;
+
+        voice.play(file, { format: "ogg" });
+        const message = await this.genPlayingMessage(status.list, status.index);
+        retry(() => status.statusMessage.edit(message)).catch(console.error);
+    }
+
+    private async genPlayingMessage(list: IAudioList, index: number) {
+        const now = await this.audio.get(list.audio[index]);
+        const previous = (index > 0) ? await this.audio.get(list.audio[index - 1]) : null;
+        const next = (index < list.audio.length) ? await this.audio.get(list.audio[index + 1]) : null;
+        const fields = [];
+
+        if (now) fields.push({ name: "__Now__", value: now.title });
+        if (previous) fields.push({ name: "Previous", value: previous.title, inline: true });
+        if (next) fields.push({ name: "Next", value: next.title, inline: true });
+
+        return {
+            embed: {
+                color: 4886754,
+                description: list.name,
+                fields,
+                title: "Playing"
+            }
+        } as MessageContent;
+    }
+}
