@@ -96,3 +96,121 @@ export class Discord {
             guildOnly: true
         });
         this.bot.registerCommand("register", this.commandRegister.bind(this), {
+            description: "Register or bind account",
+            usage: "[token]"
+        });
+        this.bot.registerCommand("bind", this.commandBind.bind(this), {
+            description: "Generate bind token"
+        });
+    }
+
+    private commandHi(msg: Message) {
+        if (!msg.member) return;
+
+        if (msg.member.voiceState.channelID) {
+            void this.bot.joinVoiceChannel(msg.member.voiceState.channelID).then(voice => {
+                voice.on('warn', msg => console.error(`[Discord] warn: ${msg}`));
+                voice.on('error', err => console.error("[Discord] error: ", err));
+            });
+            void msg.channel.createMessage(MESSAGE_HI);
+        } else {
+            void msg.channel.createMessage(MESSAGE_HI_NOT_IN_VOICE);
+        }
+    }
+
+    private async commandPlay(msg: Message, args: string[]) {
+        const list = await this.list.get(new ObjectId(args[0]));
+        const voice = this.bot.voiceConnections.get((msg.channel as TextChannel).guild.id);
+        const mode = (args[1]) ? ((args[1].toLocaleLowerCase() === "random") ? PlayMode.random : PlayMode.normal) : PlayMode.normal;
+
+        if (!list) {
+            void msg.channel.createMessage(MESSAGE_LIST_NOT_FOUND);
+            return;
+        }
+
+        if (!voice) {
+            void msg.channel.createMessage(MESSAGE_NOT_IN_VOICE);
+            return;
+        }
+
+        // Init playing status
+        let isPlaying = false;
+        if (mode === PlayMode.random) shuffle(list.audio);
+        if (this.playing.has(voice.id)) isPlaying = true;
+        this.playing.set(voice.id, {
+            index: 0,
+            list,
+            mode,
+            statusMessage: await this.bot.createMessage(msg.channel.id, await this.genPlayingMessage(list, 0))
+        });
+
+        // Start play
+        if (!isPlaying) {
+            const onEnd = async () => {
+                // check status
+                const status = this.playing.get(voice.id);
+                if (!status) {
+                    this.bot.closeVoiceConnection(voice.id)
+                    return;
+                }
+
+                // next
+                status.index++;
+                if (status.index >= status.list.audio.length) {
+                    // refresh list
+                    const newList = await this.list.get(status.list._id);
+                    if (newList) {
+                        if (status.mode === PlayMode.random) {
+                            newList.audio.sort();
+                            shuffle(newList.audio);
+                        }
+                        status.list = newList;
+                        status.index = 0;
+                    } else {
+                        this.playing.delete(voice.id);
+                        return;
+                    }
+                }
+
+                retry(() => this.play(voice, status)).catch(err => {
+                    console.error(err)
+
+                    // Deletet play state
+                    this.playing.delete(voice.id);
+                    voice.removeListener("end", onEnd)
+                    voice.stopPlaying()
+                });
+            }
+            voice.on("end", onEnd);
+            voice.once("disconnect", err => {
+                console.error(err)
+                this.bot.closeVoiceConnection(voice.id)
+                this.playing.delete(voice.id);
+                voice.removeListener("end", onEnd)
+                voice.stopPlaying()
+            })
+
+            void this.play(voice, this.playing.get(voice.id)!);
+        }
+    }
+
+    private commandNext(msg: Message) {
+        const voice = this.bot.voiceConnections.get((msg.channel as TextChannel).guild.id);
+
+        if (voice) {
+            voice.stopPlaying();
+        } else {
+            void msg.channel.createMessage(MESSAGE_NOTHING_PLAYING);
+        }
+    }
+
+    private commandBye(msg: Message) {
+        const voice = this.bot.voiceConnections.get((msg.channel as TextChannel).guild.id);
+
+        if (voice) {
+            this.bot.closeVoiceConnection(voice.id)
+            this.playing.delete(voice.id);
+        } else {
+            void msg.channel.createMessage(MESSAGE_NOTHING_PLAYING);
+        }
+    }
