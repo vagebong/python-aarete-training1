@@ -138,3 +138,152 @@ export class Telegram {
                     await this.listAudioAddCallback(query, data);
                     break;
                 case "ListAudioDel":
+                    await this.listAudioDeleteCallback(query, data);
+                    break;
+                case "ListAudio":
+                    await this.listAudioCallback(query, data);
+                    break;
+                case "AddAdmin":
+                    await this.AddAdminCallback(query, data);
+                    break;
+                case "RemoveAdmin":
+                    await this.RemoveAdminCallback(query, data);
+                    break;
+                case "ListRename":
+                    await this.listRenameCallback(query, data);
+                    break;
+                case "ListDelete":
+                    await this.listDeleteCallback(query, data);
+                    break;
+            }
+        });
+
+        this.bot.on("error", err => console.error(err));
+    }
+
+    private async commandRegister(msg: Message) {
+        if (!msg.from || !msg.text) return;
+
+        const args = msg.text.split(" ");
+
+        try {
+            if (args.length > 1) {
+                await this.user.createFromToken(args[1], { type: BIND_TYPE, id: msg.from.id });
+            } else {
+                await this.user.create(
+                    msg.from.username || msg.from.id.toString(),
+                    { type: BIND_TYPE, id: msg.from.id }
+                );
+            }
+        } catch (error) {
+            this.sendError(msg, error.message as string);
+            return;
+        }
+
+        void this.commandInfo(msg);
+    }
+
+    // Commands
+    private async commandBind(msg: Message) {
+        if (!msg.from) return;
+
+        const user = await this.getUser(msg.from.id);
+
+        if (!user) {
+            this.sendError(msg, ERR_NOT_REGISTER);
+            return;
+        }
+
+        void this.queueSendMessage(
+            msg.chat.id,
+            `Register token: ${this.user.createBindToken(user._id)}\nExpires after one hour`
+        );
+    }
+
+    private async commandInfo(msg: Message) {
+        if (!msg.from) return;
+
+        const user = await this.user.getFromBind(BIND_TYPE, msg.from.id);
+        if (!user) {
+            void this.queueSendMessage(msg.chat.id, ERR_NOT_REGISTER);
+        } else {
+            void this.queueSendMessage(
+                msg.chat.id,
+                `ID: ${user._id}\nName: ${user.name}\nBind: ${user.bind.map(i => `${i.type}(${i.id})`).join(", ")}`
+            );
+        }
+    }
+
+    private async commandShowList(msg: Message) {
+        if (!msg.from || !msg.text) return;
+
+        const args = msg.text.split(" ");
+        const user = await this.getUser(msg.from.id);
+
+        if (!user) {
+            this.sendError(msg, ERR_NOT_REGISTER);
+            return;
+        }
+
+        let view;
+
+        if (args[1] && args[1].toLocaleLowerCase() === "all") {
+            view = await this.genPlaylistView();
+        } else {
+            view = await this.genPlaylistView(0, user._id);
+        }
+
+        if (view.button) {
+            void this.queueSendMessage(msg.chat.id, view.text, { reply_markup: { inline_keyboard: view.button } });
+        } else {
+            void this.queueSendMessage(msg.chat.id, view.text);
+        }
+    }
+
+    // Callbacks
+    private async audioInfoCallback(query: CallbackQuery, data: string[]) {
+        if (!query.message || !data[1]) return;
+
+        const audio = await this.audio.get(new ObjectId(data[1]));
+        if (!audio) return;
+
+        void this.bot.editMessageText(`ID: ${audio._id.toHexString()}\nTitle: ${audio.title}`, { chat_id: query.message.chat.id, message_id: query.message.message_id });
+    }
+
+    private async playlistCallback(query: CallbackQuery, data: string[]) {
+        if (!query.message) return;
+
+        const view = await ((data[1]) ? this.genPlaylistView(parseInt(data[2], 10), new ObjectId(data[1])) : this.genPlaylistView(parseInt(data[2], 10)));
+
+        void this.bot.editMessageText(view.text, {
+            chat_id: query.message.chat.id,
+            message_id: query.message.message_id,
+            reply_markup: { inline_keyboard: view.button }
+        });
+    }
+
+    private async listInfoCallback(query: CallbackQuery, data: string[]) {
+        if (!query.message) return;
+        const user = await this.getUser(query.from.id);
+        if (!user) return;
+        const view = await this.genListInfoView(new ObjectId(data[1]), user._id);
+        const options: EditMessageTextOptions = {
+            chat_id: query.message.chat.id,
+            message_id: query.message.message_id,
+            reply_markup: { inline_keyboard: view.button }
+        };
+
+        void this.bot.editMessageText(view.text, options);
+    }
+
+    private async listCreateCallback(query: CallbackQuery, data: string[]) {
+        if (!query.message || !data[1]) return;
+        const user = await this.getUser(query.from.id);
+        if (!user || !user._id.equals(new ObjectId(data[1]))) return;
+
+        const message = await this.queueSendMessage(query.message.chat.id, "Enter name for new playlist", {
+            reply_markup: {
+                force_reply: true,
+                selective: true
+            }
+        });
