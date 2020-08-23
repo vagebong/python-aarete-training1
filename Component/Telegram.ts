@@ -402,3 +402,118 @@ export class Telegram {
                         });
                     }
                 }
+            } else {
+                void this.queueSendMessage(reply.chat.id, "Invalid name!");
+            }
+
+            this.bot.removeReplyListener(message.message_id);
+        });
+    }
+
+    private async RemoveAdminCallback(query: CallbackQuery, data: string[]) {
+        if (!query.message || !data[1]) return;
+        const list = await this.list.get(new ObjectId(data[1]));
+        const user = await this.getUser(query.from.id);
+        if (!user || !list || !list.owner.equals(user._id)) return;
+
+        const message = await this.queueSendMessage(query.message.chat.id, "Enter user's ID to remove admin", {
+            reply_markup: {
+                force_reply: true,
+                selective: true,
+            }
+        });
+
+        if (message instanceof Error) throw message;
+
+        this.bot.onReplyToMessage(message.chat.id, message.message_id, async reply => {
+            if (!reply.from || reply.from.id !== query.from.id) return;
+
+            if (reply.text) {
+                if (!ObjectId.isValid(reply.text)) {
+                    void this.queueSendMessage(reply.chat.id, "ID Invalid!");
+                } else if (reply.text === user._id.toHexString()) {
+                    void this.queueSendMessage(reply.chat.id, "You are removing your self!");
+                } else {
+                    const userToRemove = await this.user.get(new ObjectId(reply.text));
+                    if (!userToRemove) {
+                        void this.queueSendMessage(reply.chat.id, "User not found!");
+                    } else {
+                        await this.list.removeAdmin(list._id, userToRemove._id);
+                        void this.queueSendMessage(reply.chat.id, "Success!", {
+                            reply_to_message_id: reply.message_id
+                        });
+                    }
+                }
+            } else {
+                void this.queueSendMessage(reply.chat.id, "Invalid name!");
+            }
+
+            this.bot.removeReplyListener(message.message_id);
+        });
+    }
+
+    private async listRenameCallback(query: CallbackQuery, data: string[]) {
+        if (!query.message || !data[1]) return;
+        const list = await this.list.get(new ObjectId(data[1]));
+        const user = await this.getUser(query.from.id);
+        if (!user || !list || !list.owner.equals(user._id)) return;
+
+        const message = await this.queueSendMessage(query.message.chat.id, "Enter new name", {
+            reply_markup: {
+                force_reply: true,
+                selective: true,
+            }
+        });
+
+        if (message instanceof Error) throw message;
+
+        this.bot.onReplyToMessage(message.chat.id, message.message_id, async reply => {
+            if (!reply.from || reply.from.id !== query.from.id) return;
+
+            if (reply.text) {
+                await this.list.rename(list._id, reply.text);
+                void this.queueSendMessage(reply.chat.id, "Success!", {
+                    reply_to_message_id: reply.message_id
+                });
+            } else {
+                void this.queueSendMessage(reply.chat.id, "Invalid name!");
+            }
+
+            this.bot.removeReplyListener(message.message_id);
+        });
+    }
+
+    private async listDeleteCallback(query: CallbackQuery, data: string[]) {
+        if (!query.message || !data[1]) return;
+        const list = await this.list.get(new ObjectId(data[1]));
+        const user = await this.getUser(query.from.id);
+        if (!user || !list || !list.owner.equals(user._id)) return;
+
+        if (data[2]) {
+            await this.list.delete(new ObjectId(data[1]));
+            void this.bot.editMessageReplyMarkup(
+                { inline_keyboard: [[{ text: "Deleted", callback_data: "dummy" }]] },
+                { chat_id: query.message.chat.id, message_id: query.message.message_id }
+            );
+        } else {
+            void this.bot.sendMessage(query.message.chat.id, `Are you sure delete list ${list.name}?`, {
+                reply_markup: { inline_keyboard: [[{ text: "Yes", callback_data: `ListDelete ${data[1]} y` }]] }
+            });
+        }
+    }
+
+    // View generators
+    private async genPlaylistView(start = 0, user?: ObjectId) {
+        const list = (user) ? this.list.getFromPermission(user) : this.list.getAll();
+        const array = await list.clone().skip(start).limit(10).toArray();
+        const button: InlineKeyboardButton[][] = [];
+
+        array.map((item, index) => {
+            if (index < 5) {
+                if (!button[0]) button[0] = [];
+
+                button[0].push({
+                    callback_data: `ListInfo ${item._id.toHexString()}`,
+                    text: String(start + index + 1)
+                });
+            } else {
