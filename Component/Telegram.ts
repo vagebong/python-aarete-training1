@@ -517,3 +517,118 @@ export class Telegram {
                     text: String(start + index + 1)
                 });
             } else {
+                if (!button[1]) button[1] = [];
+
+                button[1].push({
+                    callback_data: `ListInfo ${item._id.toHexString()}`,
+                    text: String(start + index + 1)
+                });
+            }
+        });
+
+        if (await list.clone().hasNext()) {
+            button.push([]);
+
+            if (start - 10 >= 0) {
+                button[button.length - 1].push({
+                    callback_data: `List ${(user) ? user.toHexString() : undefined} ${start - 10}`,
+                    text: "<"
+                });
+            }
+            if (await list.clone().skip(start + 10).hasNext()) {
+                button[button.length - 1].push({
+                    callback_data: `List ${(user) ? user.toHexString() : undefined} ${start + 10}`,
+                    text: ">"
+                });
+            }
+        }
+
+        if (user) {
+            button.push([]);
+            button[button.length - 1].push({
+                callback_data: `ListCreate ${user}`,
+                text: "Create new playlist"
+            });
+        }
+
+        return {
+            button,
+            text: "Playlist:\n" + array.map((item, index) => `${start + index + 1}. ${item.name} (${item.audio.length} sounds)`).join("\n")
+        };
+    }
+
+    private async genListInfoView(listID: ObjectId, user: ObjectId) {
+        const list = await this.list.get(listID);
+        const button: InlineKeyboardButton[][] = [[], [], []];
+
+        if (!list) throw ERR_LIST_NOT_FOUND;
+        if (list.owner.equals(user) || list.admin.find(id => id.equals(user))) button[0].push({ text: "Add sounds", callback_data: `ListAudioAdd ${listID.toHexString()}` });
+        button[0].push({ text: "Show sounds", callback_data: `ListAudio show ${listID.toHexString()}` });
+        if (list.owner.equals(user) || list.admin.find(id => id.equals(user))) button[0].push({ text: "Delete sounds", callback_data: `ListAudio delete ${listID.toHexString()}` });
+        if (list.owner.equals(user)) button[1].push({ text: "Add Admin", callback_data: `AddAdmin ${listID.toHexString()}` });
+        if (list.owner.equals(user)) button[1].push({ text: "Remove Admin", callback_data: `RemoveAdmin ${listID.toHexString()}` });
+        if (list.owner.equals(user)) button[2].push({ text: "Rename", callback_data: `ListRename ${listID.toHexString()}` });
+        if (list.owner.equals(user)) button[2].push({ text: "Delete", callback_data: `ListDelete ${listID.toHexString()}` });
+
+        return {
+            button,
+            text: `ID: ${list._id.toHexString()}\nName: ${list.name}\nOwner: ${list.owner}\nSounds: ${list.audio.length}\nAdmins: ${list.admin}`
+        };
+    }
+
+    private async genAudioListView(listID: ObjectId, start = 0, deleteMode = false) {
+        const list = await this.list.get(listID);
+        if (!list) return;
+        const button: InlineKeyboardButton[][] = [];
+        const audio = await Promise.all(list.audio.slice(start, start + 10).map(item => this.audio.get(item)));
+
+        audio.forEach((item, index) => {
+            if (!item) return;
+
+            if (index < 5) {
+                if (!button[0]) button[0] = [];
+
+                button[0].push({
+                    callback_data: (deleteMode) ? `ListAudioDel ${listID} ${item._id}` : `AudioInfo ${item._id}`,
+                    text: String(index + start + 1)
+                });
+            } else {
+                if (!button[1]) button[1] = [];
+
+                button[1].push({
+                    callback_data: (deleteMode) ? `ListAudioDel ${listID} ${item._id}` : `AudioInfo ${item._id}`,
+                    text: String(index + start + 1)
+                });
+            }
+        });
+
+        if (0 < list.audio.length) {
+            button.push([]);
+
+            if (start - 10 >= 0) {
+                button[button.length - 1].push({
+                    callback_data: `ListAudio ${(deleteMode) ? "delete" : "show"} ${listID} ${start - 10}`,
+                    text: "<"
+                });
+            }
+            if (start + 10 < list.audio.length) {
+                button[button.length - 1].push({
+                    callback_data: `ListAudio ${(deleteMode) ? "delete" : "show"} ${listID} ${start + 10}`,
+                    text: ">"
+                });
+            }
+        }
+
+        return {
+            button: (button.length > 0) ? button : null,
+            text: ((deleteMode) ? "Choose sound to delete:\n" : "Sound list:\n") +
+                audio.map((item, index) => (item) ? `${start + index + 1}. ${item.title} ${(item.artist) ? `(${item.artist})` : ""}` : item).join("\n")
+        };
+    }
+
+    // Audio process
+    private async processAudio(msg: Message) {
+        if (!msg.from || !msg.audio) return;
+
+        const sender = await this.getUser(msg.from.id);
+        if (!sender) {
