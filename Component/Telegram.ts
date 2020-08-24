@@ -861,3 +861,5 @@ export class Telegram {
             await sleep(1000);
             return callback;
         });
+    }
+}
