@@ -759,3 +759,105 @@ export class Telegram {
             void this.queueSendMessage(msg.chat.id, errorMessage, {
                 disable_web_page_preview: true,
                 reply_to_message_id: msg.message_id
+            });
+        }
+    }
+
+    private async sendNeedTitle(msg: Message, filename?: string): Promise<string> {
+        if (filename) filename = filename.replace(/\.\w+$/i, "");
+        const needTitle = await this.queueSendMessage(msg.chat.id, "The music doesn't have a title.\nPlease add one for it!", {
+            reply_markup: {
+                force_reply: true,
+                inline_keyboard: (filename) ? [[{ text: "Use filename", callback_data: `setTitle/${msg.message_id}/${filename}` }]] : undefined,
+                selective: true,
+            },
+            reply_to_message_id: msg.message_id
+        }) ;
+
+        return new Promise<string>((resolve, reject) => {
+            const callbackListener = (query: CallbackQuery) => {
+                if (!query.data || !msg.from || query.from.id !== msg.from.id) return;
+
+                const data = query.data.split("/");
+                if (data.length !== 3 || data[0] !== "setTitle" || parseInt(data[1], 10) !== msg.message_id) return;
+
+                resolve(data[2]);
+
+                void this.bot.deleteMessage(needTitle.chat.id, String(needTitle.message_id));
+                this.bot.removeReplyListener(needTitle.message_id);
+                this.bot.removeListener("callback_query", callbackListener);
+            };
+
+            this.bot.on("callback_query", callbackListener);
+
+            this.bot.onReplyToMessage(msg.chat.id, needTitle.message_id, reply => {
+                // If not origin sender
+                if (!reply.from || !msg.from || reply.from.id !== msg.from.id) return;
+
+                if (reply.text) {
+                    void this.queueSendMessage(reply.chat.id, "Title set", { reply_to_message_id: reply.message_id });
+                    resolve(reply.text);
+                } else {
+                    void this.queueSendMessage(reply.chat.id, "It doesn't look like a title.", { reply_to_message_id: reply.message_id, });
+                    reject(ERR_NOT_VALID_TITLE);
+                }
+
+                this.bot.removeReplyListener(needTitle.message_id);
+                this.bot.removeListener("callback_query", callbackListener);
+            });
+        });
+    }
+
+    private async processDone(msg: Message, audio: WithId<IAudioData>) {
+        const session = this.audioAddSession.get(msg.chat.id);
+        if (session) await this.list.addAudio(session, audio._id);
+
+        const message = `ID: ${audio._id}\nTitle: ${audio.title}${(session) ? "\n\nAdded to list!" : ""}`;
+        if (msg.from && msg.from.id === this.me.id) {
+            return this.bot.editMessageText(message, {
+                chat_id: msg.chat.id,
+                message_id: msg.message_id
+            });
+        } else {
+            return this.queueSendMessage(msg.chat.id, message, {
+                reply_to_message_id: msg.message_id
+            });
+        }
+    }
+
+    // Misc
+    private getUser(id: number) {
+        return this.user.getFromBind(BIND_TYPE, id);
+    }
+
+    private getFile(fileId: string) {
+        fileId = fileId.replace("tg://", "");
+        return retry(() => this.bot.getFileLink(fileId));
+    }
+
+    private async getMetadata(fileId: string) {
+        const file = await this.getFile(fileId);
+        return this.audio.urlParser.getMetadata(file);
+    }
+
+    private async checkSessionPermission(msg: Message) {
+        if (msg.chat.type === "private") {
+            const session = this.audioAddSession.get(msg.chat.id);
+            if (session && msg.from) {
+                const list = await this.list.get(session);
+                const user = await this.getUser(msg.from.id);
+                if (!user || !list || !(list.owner.equals(user._id) || list.admin.find(id => id.equals(user._id)))) {
+                    this.audioAddSession.delete(msg.chat.id);
+                    void this.sendError(msg, ERR_PERMISSION_LOST);
+                }
+            }
+        }
+    }
+
+    // TODO rewrite message cool down
+    private queueSendMessage(chatId: number | string, text: string, options?: TelegramBot.SendMessageOptions) {
+        return this.messageQueue.add(async () => {
+            const callback = this.bot.sendMessage(chatId, text, options);
+            await sleep(1000);
+            return callback;
+        });
