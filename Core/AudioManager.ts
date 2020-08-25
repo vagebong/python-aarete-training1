@@ -128,3 +128,71 @@ export class AudioManager {
         // delete file
         const file = this.getCachePath(audio);
         if (await exists(file)) await fsp.unlink(file);
+
+        return this.database.deleteOne({ _id: id });
+    }
+
+    public get(id: ObjectId) {
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return retry(() => this.database!.findOne({ _id: id }), 17280, 5000, false);
+    }
+
+    public search(metadata?: Filter<IAudioData>) {
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return metadata === undefined ? this.database.find() : this.database.find(metadata);
+    }
+
+    public async getFile(audio: IAudioData) {
+        const path = this.getCachePath(audio);
+        return await exists(path) ? path : false;
+    }
+
+    public async checkCache(deep = false): Promise<void> {
+        if (deep) console.log("[Audio] Starting deep cache check...");
+
+        for await (const audio of this.search()) {
+            if (audio == null) return
+            const file = this.getCachePath(audio);
+
+            if (!await exists(file)) {
+                if (!audio.source) {
+                    void this.delete(audio._id);
+                    return;
+                }
+
+                console.log(`[Audio] ${audio.title} missing in cache, redownload..`);
+                try {
+                    const source = await this.urlParser.getFile(audio.source);
+                    await retry(() => this.encodeQueue.add(async () => this.encode(source, audio.hash, audio.duration)));
+                } catch (e) {
+                    console.error(`Failed to download ${audio.title}`, e.message);
+                    void this.delete(audio._id);
+                }
+            } else if (deep) {
+                const metadata = this.metadataQueue.add(() => this.urlParser.getMetadata(file));
+
+                if (Math.abs((await metadata).duration - audio.duration) > 1) {
+                    if (!audio.source) {
+                        void this.delete(audio._id);
+                        return;
+                    }
+
+                    console.log(`[Audio] ${audio.title} cache damaged, redownload...`);
+                    try {
+                        const source = await this.urlParser.getFile(audio.source);
+                        await retry(() => this.encodeQueue.add(() => this.encode(source, audio.hash, audio.duration)));
+                    } catch (e) {
+                        console.error(`Failed to download ${audio.title}`, e.message);
+                        void this.delete(audio._id);
+                    }
+                }
+            }
+        }
+    }
+
+    private getCachePath(audio: IAudioData) {
+        return resolve(this.config.save as string, audio.hash + ".ogg");
+    }
+}
