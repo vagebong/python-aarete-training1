@@ -17,4 +17,8 @@ export class ListManager {
 
     constructor(core: Core) {
         core.on("init", () => {
-            this.audioManage
+            this.audioManager = core.audioManager;
+        });
+
+        core.on("ready", () => {
+            if (!this.audioManager) throw Er
