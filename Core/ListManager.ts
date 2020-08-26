@@ -13,4 +13,8 @@ export interface IAudioList {
 
 export class ListManager {
     private database?: Collection<IAudioList>;
-  
+    private audioManager!: AudioManager;
+
+    constructor(core: Core) {
+        core.on("init", () => {
+            this.audioManage
