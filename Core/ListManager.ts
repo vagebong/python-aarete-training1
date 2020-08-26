@@ -7,4 +7,10 @@ import { retry } from "./Utils/PromiseUtils";
 export interface IAudioList {
     name: string;
     owner: ObjectId;
-    
+    admin: ObjectId[];
+    audio: ObjectId[];
+}
+
+export class ListManager {
+    private database?: Collection<IAudioList>;
+  
