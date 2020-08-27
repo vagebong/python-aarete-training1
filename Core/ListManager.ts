@@ -21,4 +21,7 @@ export class ListManager {
         });
 
         core.on("ready", () => {
-            if (!this.audioManager) throw Er
+            if (!this.audioManager) throw Error("AudioManager not init");
+            if (!core.database.client) throw Error("Database client not init");
+
+            this
