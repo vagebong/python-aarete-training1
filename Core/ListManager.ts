@@ -24,4 +24,7 @@ export class ListManager {
             if (!this.audioManager) throw Error("AudioManager not init");
             if (!core.database.client) throw Error("Database client not init");
 
-            this
+            this.database = core.database.client.collection("list");
+
+            // Add field admin to old lists
+            void 
