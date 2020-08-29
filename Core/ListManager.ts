@@ -35,4 +35,7 @@ export class ListManager {
         });
     }
 
-    public async 
+    public async create(name: string, owner: ObjectId) {
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        await this.dat
