@@ -30,4 +30,9 @@ export class ListManager {
             void this.database.updateMany({ admin: { $exists: false } }, { $set: { admin: [] } });
 
             // Create indexes
-            void this.d
+            void this.database.createIndex({ owner: 1 });
+            void this.database.createIndex({ admin: 1 });
+        });
+    }
+
+    public async 
