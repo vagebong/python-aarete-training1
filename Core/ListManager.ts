@@ -38,4 +38,8 @@ export class ListManager {
     public async create(name: string, owner: ObjectId) {
         if (!this.database) throw ERR_DB_NOT_INIT;
 
-        await this.dat
+        await this.database.insertOne({
+            admin: Array<ObjectId>(),
+            audio: Array<ObjectId>(),
+            name,
+            owne
