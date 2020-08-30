@@ -53,4 +53,9 @@ export class ListManager {
     }
 
     public getAll() {
- 
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return this.database.find();
+    }
+
+    public getFromPermission(user
