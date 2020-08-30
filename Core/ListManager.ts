@@ -49,4 +49,8 @@ export class ListManager {
     public get(id: ObjectId) {
         if (!this.database) throw ERR_DB_NOT_INIT;
 
-  
+        return retry(() => this.database!.findOne({ _id: id }), 17280, 5000, false);
+    }
+
+    public getAll() {
+ 
