@@ -58,4 +58,7 @@ export class ListManager {
         return this.database.find();
     }
 
-    public getFromPermission(user
+    public getFromPermission(user: ObjectId) {
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return this.database.find({ $or: [{ owne
