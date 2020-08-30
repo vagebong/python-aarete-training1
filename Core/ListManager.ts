@@ -42,4 +42,11 @@ export class ListManager {
             admin: Array<ObjectId>(),
             audio: Array<ObjectId>(),
             name,
-            owne
+            owner
+        });
+    }
+
+    public get(id: ObjectId) {
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+  
