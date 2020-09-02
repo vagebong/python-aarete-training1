@@ -80,4 +80,7 @@ export class ListManager {
         await this.database.deleteOne({ _id: id });
     }
 
-    public async addAdm
+    public async addAdmin(id: ObjectId, admin: ObjectId) {
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return (await t
