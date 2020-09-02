@@ -65,4 +65,9 @@ export class ListManager {
     }
 
     public async rename(id: ObjectId, name: string) {
-        if (!this.database) throw ERR_DB_
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return (await this.database.findOneAndUpdate(
+            { _id: id },
+            { $set: { name } },
+ 
