@@ -70,4 +70,9 @@ export class ListManager {
         return (await this.database.findOneAndUpdate(
             { _id: id },
             { $set: { name } },
- 
+            { returnDocument: "after" }
+        )).value;
+    }
+
+    public async delete(id: ObjectId) {
+        if (!this
