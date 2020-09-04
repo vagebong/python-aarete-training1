@@ -86,4 +86,9 @@ export class ListManager {
         return (await this.database.findOneAndUpdate(
             { _id: id },
             { $addToSet: { admin } },
-            { returnDocument: "afte
+            { returnDocument: "after" }
+        )).value;
+    }
+
+    public async removeAdmin(id: ObjectId, admin: ObjectId) {
+        if (!this.database) throw ER
