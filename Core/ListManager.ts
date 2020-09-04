@@ -83,4 +83,7 @@ export class ListManager {
     public async addAdmin(id: ObjectId, admin: ObjectId) {
         if (!this.database) throw ERR_DB_NOT_INIT;
 
-        return (await t
+        return (await this.database.findOneAndUpdate(
+            { _id: id },
+            { $addToSet: { admin } },
+            { returnDocument: "afte
