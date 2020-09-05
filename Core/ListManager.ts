@@ -91,4 +91,8 @@ export class ListManager {
     }
 
     public async removeAdmin(id: ObjectId, admin: ObjectId) {
-        if (!this.database) throw ER
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return (await this.database.findOneAndUpdate(
+            { _id: id },
+            { $
