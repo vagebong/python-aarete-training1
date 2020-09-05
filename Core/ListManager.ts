@@ -104,4 +104,10 @@ export class ListManager {
         if (!this.database) throw ERR_DB_NOT_INIT;
 
         return (await this.database.findOneAndUpdate(
-            { _id:
+            { _id: id },
+            { $addToSet: { audio } },
+            { returnDocument: "after" }
+        )).value;
+    }
+
+    public async 
