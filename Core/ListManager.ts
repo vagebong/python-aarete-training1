@@ -95,4 +95,10 @@ export class ListManager {
 
         return (await this.database.findOneAndUpdate(
             { _id: id },
-            { $
+            { $pull: { admin } },
+            { returnDocument: "after" }
+        )).value;
+    }
+
+    public async addAudio(id: ObjectId, audio: ObjectId) {
+ 
