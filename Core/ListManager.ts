@@ -101,4 +101,7 @@ export class ListManager {
     }
 
     public async addAudio(id: ObjectId, audio: ObjectId) {
- 
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return (await this.database.findOneAndUpdate(
+            { _id:
