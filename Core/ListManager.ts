@@ -113,4 +113,7 @@ export class ListManager {
     public async delAudio(id: ObjectId, audio: ObjectId) {
         if (!this.database) throw ERR_DB_NOT_INIT;
 
-        return (await this.
+        return (await this.database.findOneAndUpdate(
+            { _id: id },
+            { $pull: { audio } },
+            { returnDocument: "after"
