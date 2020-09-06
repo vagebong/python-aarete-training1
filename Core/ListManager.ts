@@ -110,4 +110,7 @@ export class ListManager {
         )).value;
     }
 
-    public async 
+    public async delAudio(id: ObjectId, audio: ObjectId) {
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return (await this.
