@@ -116,4 +116,9 @@ export class ListManager {
         return (await this.database.findOneAndUpdate(
             { _id: id },
             { $pull: { audio } },
-            { returnDocument: "after"
+            { returnDocument: "after" }
+        )).value;
+    }
+
+    public async delAudioAll(audio: ObjectId) {
+        if (!this.database) throw ERR_DB
