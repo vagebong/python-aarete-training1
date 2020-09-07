@@ -121,4 +121,10 @@ export class ListManager {
     }
 
     public async delAudioAll(audio: ObjectId) {
-        if (!this.database) throw ERR_DB
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return this.database.updateMany({}, { $pull: { audio } });
+    }
+
+    public async checkAudioExist() {
+ 
