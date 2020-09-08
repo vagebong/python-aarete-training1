@@ -132,4 +132,10 @@ export class ListManager {
                 if (!await this.audioManager.get(audio)) void this.delAudioAll(audio);
             });
         });
-   
+    }
+
+    public async audioInList(audio: ObjectId) {
+        return this.searchListFromAudio(audio).hasNext();
+    }
+
+ 
