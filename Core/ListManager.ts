@@ -141,4 +141,6 @@ export class ListManager {
     private searchListFromAudio(audio: ObjectId) {
         if (!this.database) throw ERR_DB_NOT_INIT;
 
-     
+        return this.database.find({ audio });
+    }
+}
