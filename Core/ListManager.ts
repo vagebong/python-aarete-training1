@@ -138,4 +138,7 @@ export class ListManager {
         return this.searchListFromAudio(audio).hasNext();
     }
 
- 
+    private searchListFromAudio(audio: ObjectId) {
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+     
