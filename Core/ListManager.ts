@@ -129,4 +129,7 @@ export class ListManager {
     public async checkAudioExist() {
         await this.getAll().forEach(list => {
             list.audio.forEach(async audio => {
-                if
+                if (!await this.audioManager.get(audio)) void this.delAudioAll(audio);
+            });
+        });
+   
