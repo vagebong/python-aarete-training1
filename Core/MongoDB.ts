@@ -13,3 +13,8 @@ export class MongoDB extends EventEmitter {
 
     constructor(config: any) {
         super();
+
+        config = config.database;
+
+        void MongoClient.connect(config.host as string).then(client => {
+            c
