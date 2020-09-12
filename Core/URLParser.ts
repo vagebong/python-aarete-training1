@@ -49,3 +49,7 @@ export class UrlParser {
                 return provider(url);
             }
         }
+
+        return getMediaInfo(url);
+    }
+}
