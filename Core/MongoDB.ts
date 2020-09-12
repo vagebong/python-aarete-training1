@@ -17,4 +17,6 @@ export class MongoDB extends EventEmitter {
         config = config.database;
 
         void MongoClient.connect(config.host as string).then(client => {
-            c
+            console.log("[MongoDB] Connected successfully to server");
+
+            this.client = client.db(config.name as str
