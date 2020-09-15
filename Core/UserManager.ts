@@ -8,4 +8,13 @@ export const ERR_BIND_TOKEN_NOT_FOUND = Error("Bind token not found");
 
 export interface IUserData {
     name: string;
-    bind: IBind
+    bind: IBindData[];
+}
+
+export interface IBindData {
+    type: string;
+    id: string | number;
+}
+
+export class UserManager {
+    private databas
