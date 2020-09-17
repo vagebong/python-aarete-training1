@@ -24,4 +24,5 @@ export class UserManager {
         core.on("ready", () => {
             if (!core.database.client) throw Error("Database client not init");
 
-            this.da
+            this.database = core.database.client.collection("user");
+            void this.database.createIndex({ "bind.type": 1, "b
