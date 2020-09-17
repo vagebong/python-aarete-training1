@@ -17,4 +17,8 @@ export interface IBindData {
 }
 
 export class UserManager {
-    private databas
+    private database?: Collection<IUserData>;
+    private bindToken = new Map<string, ObjectId>();
+
+    constructor(core: Core) {
+        c
