@@ -21,4 +21,7 @@ export class UserManager {
     private bindToken = new Map<string, ObjectId>();
 
     constructor(core: Core) {
-        c
+        core.on("ready", () => {
+            if (!core.database.client) throw Error("Database client not init");
+
+            this.da
