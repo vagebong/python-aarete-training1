@@ -30,4 +30,9 @@ export class UserManager {
     }
 
     public get(id: ObjectId) {
-        if (!this.database) thr
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return this.database.findOne({_id: id});
+    }
+
+    public getFromBind(type: string, id: string | numb
