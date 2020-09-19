@@ -42,4 +42,8 @@ export class UserManager {
     }
 
     public async create(name: string, bind: IBindData) {
-        if (!this.database
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        if (await this.getFromBind(bind.type, bind.id)) throw ERR_USER_EXIST;
+
+    
