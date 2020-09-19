@@ -35,4 +35,7 @@ export class UserManager {
         return this.database.findOne({_id: id});
     }
 
-    public getFromBind(type: string, id: string | numb
+    public getFromBind(type: string, id: string | number) {
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return this.database.findOne({ bind: { $el
