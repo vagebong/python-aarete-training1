@@ -46,4 +46,7 @@ export class UserManager {
 
         if (await this.getFromBind(bind.type, bind.id)) throw ERR_USER_EXIST;
 
-    
+        return this.bind((await this.database.insertOne({ name, bind: [] })).insertedId, bind);
+    }
+
+    public async createFromT
