@@ -38,4 +38,8 @@ export class UserManager {
     public getFromBind(type: string, id: string | number) {
         if (!this.database) throw ERR_DB_NOT_INIT;
 
-        return this.database.findOne({ bind: { $el
+        return this.database.findOne({ bind: { $elemMatch: { type, id } } });
+    }
+
+    public async create(name: string, bind: IBindData) {
+        if (!this.database
