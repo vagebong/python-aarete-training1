@@ -52,4 +52,10 @@ export class UserManager {
     public async createFromToken(token: string, bind: IBindData) {
         const id = this.bindToken.get(token);
 
-        if (!id) throw ERR_BIND_TOKEN_NOT_F
+        if (!id) throw ERR_BIND_TOKEN_NOT_FOUND;
+        if (await this.getFromBind(bind.type, bind.id)) throw ERR_USER_EXIST;
+
+        return this.bind(id, bind);
+    }
+
+    public delete(i
