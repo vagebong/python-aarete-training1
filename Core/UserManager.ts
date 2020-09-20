@@ -49,4 +49,7 @@ export class UserManager {
         return this.bind((await this.database.insertOne({ name, bind: [] })).insertedId, bind);
     }
 
-    public async createFromT
+    public async createFromToken(token: string, bind: IBindData) {
+        const id = this.bindToken.get(token);
+
+        if (!id) throw ERR_BIND_TOKEN_NOT_F
