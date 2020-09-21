@@ -61,4 +61,8 @@ export class UserManager {
     public delete(id: ObjectId) {
         if (!this.database) throw ERR_DB_NOT_INIT;
 
-        return this.database.deleteOne({ _id: id }
+        return this.database.deleteOne({ _id: id });
+    }
+
+    public createBindToken(id: ObjectId) {
+        const token = randomBytes(20).toString("hex")
