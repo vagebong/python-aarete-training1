@@ -58,4 +58,7 @@ export class UserManager {
         return this.bind(id, bind);
     }
 
-    public delete(i
+    public delete(id: ObjectId) {
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return this.database.deleteOne({ _id: id }
