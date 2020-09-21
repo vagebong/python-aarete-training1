@@ -65,4 +65,8 @@ export class UserManager {
     }
 
     public createBindToken(id: ObjectId) {
-        const token = randomBytes(20).toString("hex")
+        const token = randomBytes(20).toString("hex");
+        this.bindToken.set(token, id);
+
+        // delete token after 1 hour
+        setInterval(() => 
