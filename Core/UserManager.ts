@@ -75,4 +75,8 @@ export class UserManager {
     }
 
     private async bind(id: ObjectId, bind: IBindData) {
-     
+        if (!this.database) throw ERR_DB_NOT_INIT;
+
+        return (await this.database.findOneAndUpdate(
+            { _id: id },
+           
