@@ -69,4 +69,10 @@ export class UserManager {
         this.bindToken.set(token, id);
 
         // delete token after 1 hour
-        setInterval(() => 
+        setInterval(() => this.bindToken.delete(token), 60 * 60 * 1000);
+
+        return token;
+    }
+
+    private async bind(id: ObjectId, bind: IBindData) {
+     
