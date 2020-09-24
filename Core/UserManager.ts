@@ -79,4 +79,8 @@ export class UserManager {
 
         return (await this.database.findOneAndUpdate(
             { _id: id },
-           
+            { $addToSet: { bind } },
+            { returnDocument: "after" }
+        )).value!;
+    }
+}
