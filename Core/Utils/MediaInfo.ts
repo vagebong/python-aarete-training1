@@ -7,4 +7,8 @@ try {
     execFileSync("ffprobe", ["-version"], { stdio: "ignore" });
     ffprobe = "ffprobe";
 } catch (err) {
-    // eslint-disa
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    ffprobe = require("@ffprobe-installer/ffprobe").path;
+}
+
+expo
