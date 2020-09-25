@@ -4,4 +4,7 @@ import { IAudioMetadata } from "../URLParser";
 let ffprobe: string;
 // Test system ffprobe
 try {
-    execF
+    execFileSync("ffprobe", ["-version"], { stdio: "ignore" });
+    ffprobe = "ffprobe";
+} catch (err) {
+    // eslint-disa
