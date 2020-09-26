@@ -11,4 +11,8 @@ try {
     ffprobe = require("@ffprobe-installer/ffprobe").path;
 }
 
-expo
+export async function getMediaInfo(file: string) {
+    const ffprobeOption = [
+        "-v", "error",
+        "-of", "default=nw=1",
+        "-sh
