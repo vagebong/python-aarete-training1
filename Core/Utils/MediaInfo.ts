@@ -32,4 +32,6 @@ export async function getMediaInfo(file: string) {
             }
 
             // Match output
-            const durationMatch = /
+            const durationMatch = /duration=(.*)/i.exec(stdout);
+            const sizeMatch = /size=(.*)/i.exec(stdout);
+            const titleMatch = /TAG:title=(.*)/i
