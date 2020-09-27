@@ -24,4 +24,7 @@ export async function getMediaInfo(file: string) {
         windowsHide: true
     };
 
-    return new Promise<IAudioMetadata>((resolve, rejec
+    return new Promise<IAudioMetadata>((resolve, reject) => {
+        execFile(ffprobe, ffprobeOption, execOption, (err, stdout) => {
+            if (err) {
+             
