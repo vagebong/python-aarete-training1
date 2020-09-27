@@ -20,3 +20,8 @@ export async function getMediaInfo(file: string) {
     ];
 
     const execOption = {
+        timeout: 30000,
+        windowsHide: true
+    };
+
+    return new Promise<IAudioMetadata>((resolve, rejec
