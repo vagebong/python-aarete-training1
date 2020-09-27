@@ -27,4 +27,9 @@ export async function getMediaInfo(file: string) {
     return new Promise<IAudioMetadata>((resolve, reject) => {
         execFile(ffprobe, ffprobeOption, execOption, (err, stdout) => {
             if (err) {
-             
+                reject(err);
+                return;
+            }
+
+            // Match output
+            const durationMatch = /
