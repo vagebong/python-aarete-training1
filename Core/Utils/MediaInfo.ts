@@ -34,4 +34,8 @@ export async function getMediaInfo(file: string) {
             // Match output
             const durationMatch = /duration=(.*)/i.exec(stdout);
             const sizeMatch = /size=(.*)/i.exec(stdout);
-            const titleMatch = /TAG:title=(.*)/i
+            const titleMatch = /TAG:title=(.*)/i.exec(stdout);
+            const artistMatch = /TAG:artist=(.*)/i.exec(stdout);
+
+            // Test has match
+            const title = (titleM
