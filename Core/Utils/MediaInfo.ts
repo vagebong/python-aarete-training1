@@ -38,4 +38,6 @@ export async function getMediaInfo(file: string) {
             const artistMatch = /TAG:artist=(.*)/i.exec(stdout);
 
             // Test has match
-            const title = (titleM
+            const title = (titleMatch) ? titleMatch[1] : undefined;
+            const artist = (artistMatch) ? artistMatch[1] : undefined;
+          
