@@ -40,4 +40,5 @@ export async function getMediaInfo(file: string) {
             // Test has match
             const title = (titleMatch) ? titleMatch[1] : undefined;
             const artist = (artistMatch) ? artistMatch[1] : undefined;
+            const duration = (durationMatch && durationMatch[1] !== "N/A") ? Math.round(Number(durationMatch[1])) : undefined;
           
