@@ -44,4 +44,10 @@ export async function getMediaInfo(file: string) {
             const size = (sizeMatch && sizeMatch[1] !== "N/A") ? sizeMatch[1] : undefined;
 
             resolve({
-                arti
+                artist,
+                duration,
+                size,
+                title
+            } as IAudioMetadata);
+        });
+    
