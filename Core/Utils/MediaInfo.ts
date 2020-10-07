@@ -50,4 +50,5 @@ export async function getMediaInfo(file: string) {
                 title
             } as IAudioMetadata);
         });
-    
+    });
+}
