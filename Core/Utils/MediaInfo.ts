@@ -41,4 +41,7 @@ export async function getMediaInfo(file: string) {
             const title = (titleMatch) ? titleMatch[1] : undefined;
             const artist = (artistMatch) ? artistMatch[1] : undefined;
             const duration = (durationMatch && durationMatch[1] !== "N/A") ? Math.round(Number(durationMatch[1])) : undefined;
-          
+            const size = (sizeMatch && sizeMatch[1] !== "N/A") ? sizeMatch[1] : undefined;
+
+            resolve({
+                arti
