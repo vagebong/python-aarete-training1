@@ -6,4 +6,7 @@ export async function retry<T>(fun: () => Promise<T>, time = 5, interval = 5000,
 
     do {
         try {
-       
+            run = fun();
+            return await run;
+        } catch (error) {
+            if (++tryTime > 0 && increase) i
