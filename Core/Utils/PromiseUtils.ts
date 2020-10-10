@@ -9,4 +9,12 @@ export async function retry<T>(fun: () => Promise<T>, time = 5, interval = 5000,
             run = fun();
             return await run;
         } catch (error) {
-            if (++tryTime > 0 && increase) i
+            if (++tryTime > 0 && increase) interval = interval * 2;
+        }
+        await sleep(interval);
+    } while (tryTime < time);
+
+    return run!;
+}
+
+export f
