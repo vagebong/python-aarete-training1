@@ -17,4 +17,8 @@ export async function retry<T>(fun: () => Promise<T>, time = 5, interval = 5000,
     return run!;
 }
 
-export f
+export function sleep(time: number) {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
+
+export function exists(file
