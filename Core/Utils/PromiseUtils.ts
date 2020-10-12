@@ -22,4 +22,5 @@ export function sleep(time: number) {
 }
 
 export function exists(file: string) {
-    return new Promise(resolve => {access(file, constants.F_OK, err => err ? resolve
+    return new Promise(resolve => {access(file, constants.F_OK, err => err ? resolve(false) : resolve(true)); });
+}
