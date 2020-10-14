@@ -8,4 +8,9 @@ RUN yarn remove @ffmpeg-installer/ffmpeg @ffprobe-installer/ffprobe && yarn buil
 
 FROM node:lts-alpine
 WORKDIR /app
-ENV NODE_ENV=prod
+ENV NODE_ENV=production
+
+RUN apk add --no-cache ffmpeg
+
+COPY --from=0 /app/dist /app/config.json.example /app/
+COPY --from=0 /a
