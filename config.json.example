@@ -4,4 +4,8 @@
         "bitrate": 256,
         "length": 600
     },
-    "d
+    "database": {
+        "host": "mongodb://localhost:27017",
+        "name": "musicbot"
+    },
+    "telegram": 
