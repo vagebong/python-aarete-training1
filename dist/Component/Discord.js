@@ -133,3 +133,111 @@ class Discord {
                         status.index = 0;
                     }
                     else {
+                        this.playing.delete(voice.id);
+                        return;
+                    }
+                }
+                (0, PromiseUtils_1.retry)(() => this.play(voice, status)).catch(err => {
+                    console.error(err);
+                    this.playing.delete(voice.id);
+                    voice.removeListener("end", onEnd);
+                    voice.stopPlaying();
+                });
+            };
+            voice.on("end", onEnd);
+            voice.once("disconnect", err => {
+                console.error(err);
+                this.bot.closeVoiceConnection(voice.id);
+                this.playing.delete(voice.id);
+                voice.removeListener("end", onEnd);
+                voice.stopPlaying();
+            });
+            void this.play(voice, this.playing.get(voice.id));
+        }
+    }
+    commandNext(msg) {
+        const voice = this.bot.voiceConnections.get(msg.channel.guild.id);
+        if (voice) {
+            voice.stopPlaying();
+        }
+        else {
+            void msg.channel.createMessage(MESSAGE_NOTHING_PLAYING);
+        }
+    }
+    commandBye(msg) {
+        const voice = this.bot.voiceConnections.get(msg.channel.guild.id);
+        if (voice) {
+            this.bot.closeVoiceConnection(voice.id);
+            this.playing.delete(voice.id);
+        }
+        else {
+            void msg.channel.createMessage(MESSAGE_NOTHING_PLAYING);
+        }
+    }
+    async commandRegister(msg, args) {
+        if (args[0]) {
+            try {
+                await this.user.createFromToken(args[0], { type: exports.BIND_TYPE, id: msg.author.id });
+            }
+            catch (error) {
+                void msg.channel.createMessage(error.message);
+                return;
+            }
+        }
+        else {
+            await this.user.create(msg.author.username, { type: exports.BIND_TYPE, id: msg.author.id });
+        }
+        const user = (await this.user.getFromBind(exports.BIND_TYPE, msg.author.id));
+        void msg.channel.createMessage(`ID: ${user._id}\nName: ${user.name}\nBind: ${user.bind.map(i => `${i.type}(${i.id})`).join(", ")}`);
+    }
+    async commandBind(msg) {
+        const user = await this.user.getFromBind(exports.BIND_TYPE, msg.author.id);
+        if (!user) {
+            void this.bot.createMessage(msg.channel.id, "You are not register!");
+            return;
+        }
+        void this.bot.createMessage(msg.channel.id, `Register token: ${this.user.createBindToken(user._id)}\nExpires after one hour`);
+    }
+    async procseeFile(msg) {
+        const user = await this.user.getFromBind(exports.BIND_TYPE, msg.author.id);
+        if (!user)
+            return;
+        msg.attachments.forEach(async (file) => {
+            let audio;
+            try {
+                audio = await this.audio.add(user._id, file.url);
+            }
+            catch (error) {
+                if (error === AudioManager_1.ERR_NOT_AUDIO)
+                    return;
+                if (error === AudioManager_1.ERR_MISSING_TITLE)
+                    audio = await this.audio.add(user._id, file.url, { title: file.filename });
+                else
+                    throw error;
+            }
+            void msg.channel.createMessage(`ID: ${audio._id}\nTitle: ${audio.title}`);
+        });
+    }
+    async play(voice, status) {
+        if (!voice.ready)
+            return;
+        const audio = await this.audio.get(status.list.audio[status.index]);
+        if (!audio)
+            throw ERR_CAN_NOT_GET_AUDIO;
+        const file = await this.audio.getFile(audio);
+        if (!file)
+            throw ERR_MISSING_AUDIO_FILE;
+        voice.play(file, { format: "ogg" });
+        const message = await this.genPlayingMessage(status.list, status.index);
+        (0, PromiseUtils_1.retry)(() => status.statusMessage.edit(message)).catch(console.error);
+    }
+    async genPlayingMessage(list, index) {
+        const now = await this.audio.get(list.audio[index]);
+        const previous = (index > 0) ? await this.audio.get(list.audio[index - 1]) : null;
+        const next = (index < list.audio.length) ? await this.audio.get(list.audio[index + 1]) : null;
+        const fields = [];
+        if (now)
+            fields.push({ name: "__Now__", value: now.title });
+        if (previous)
+            fields.push({ name: "Previous", value: previous.title, inline: true });
+        if (next)
