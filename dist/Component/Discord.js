@@ -241,3 +241,15 @@ class Discord {
         if (previous)
             fields.push({ name: "Previous", value: previous.title, inline: true });
         if (next)
+            fields.push({ name: "Next", value: next.title, inline: true });
+        return {
+            embed: {
+                color: 4886754,
+                description: list.name,
+                fields,
+                title: "Playing"
+            }
+        };
+    }
+}
+exports.Discord = Discord;
