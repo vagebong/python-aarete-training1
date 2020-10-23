@@ -343,3 +343,99 @@ class Telegram {
                     if (!userToAdd) {
                         void this.queueSendMessage(reply.chat.id, "User not found!");
                     }
+                    else {
+                        await this.list.addAdmin(list._id, userToAdd._id);
+                        void this.queueSendMessage(reply.chat.id, "Success!", {
+                            reply_to_message_id: reply.message_id
+                        });
+                    }
+                }
+            }
+            else {
+                void this.queueSendMessage(reply.chat.id, "Invalid name!");
+            }
+            this.bot.removeReplyListener(message.message_id);
+        });
+    }
+    async RemoveAdminCallback(query, data) {
+        if (!query.message || !data[1])
+            return;
+        const list = await this.list.get(new mongodb_1.ObjectId(data[1]));
+        const user = await this.getUser(query.from.id);
+        if (!user || !list || !list.owner.equals(user._id))
+            return;
+        const message = await this.queueSendMessage(query.message.chat.id, "Enter user's ID to remove admin", {
+            reply_markup: {
+                force_reply: true,
+                selective: true,
+            }
+        });
+        if (message instanceof Error)
+            throw message;
+        this.bot.onReplyToMessage(message.chat.id, message.message_id, async (reply) => {
+            if (!reply.from || reply.from.id !== query.from.id)
+                return;
+            if (reply.text) {
+                if (!mongodb_1.ObjectId.isValid(reply.text)) {
+                    void this.queueSendMessage(reply.chat.id, "ID Invalid!");
+                }
+                else if (reply.text === user._id.toHexString()) {
+                    void this.queueSendMessage(reply.chat.id, "You are removing your self!");
+                }
+                else {
+                    const userToRemove = await this.user.get(new mongodb_1.ObjectId(reply.text));
+                    if (!userToRemove) {
+                        void this.queueSendMessage(reply.chat.id, "User not found!");
+                    }
+                    else {
+                        await this.list.removeAdmin(list._id, userToRemove._id);
+                        void this.queueSendMessage(reply.chat.id, "Success!", {
+                            reply_to_message_id: reply.message_id
+                        });
+                    }
+                }
+            }
+            else {
+                void this.queueSendMessage(reply.chat.id, "Invalid name!");
+            }
+            this.bot.removeReplyListener(message.message_id);
+        });
+    }
+    async listRenameCallback(query, data) {
+        if (!query.message || !data[1])
+            return;
+        const list = await this.list.get(new mongodb_1.ObjectId(data[1]));
+        const user = await this.getUser(query.from.id);
+        if (!user || !list || !list.owner.equals(user._id))
+            return;
+        const message = await this.queueSendMessage(query.message.chat.id, "Enter new name", {
+            reply_markup: {
+                force_reply: true,
+                selective: true,
+            }
+        });
+        if (message instanceof Error)
+            throw message;
+        this.bot.onReplyToMessage(message.chat.id, message.message_id, async (reply) => {
+            if (!reply.from || reply.from.id !== query.from.id)
+                return;
+            if (reply.text) {
+                await this.list.rename(list._id, reply.text);
+                void this.queueSendMessage(reply.chat.id, "Success!", {
+                    reply_to_message_id: reply.message_id
+                });
+            }
+            else {
+                void this.queueSendMessage(reply.chat.id, "Invalid name!");
+            }
+            this.bot.removeReplyListener(message.message_id);
+        });
+    }
+    async listDeleteCallback(query, data) {
+        if (!query.message || !data[1])
+            return;
+        const list = await this.list.get(new mongodb_1.ObjectId(data[1]));
+        const user = await this.getUser(query.from.id);
+        if (!user || !list || !list.owner.equals(user._id))
+            return;
+        if (data[2]) {
