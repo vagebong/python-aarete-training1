@@ -220,3 +220,126 @@ class Telegram {
         const user = await this.getUser(query.from.id);
         if (!user)
             return;
+        const view = await this.genListInfoView(new mongodb_1.ObjectId(data[1]), user._id);
+        const options = {
+            chat_id: query.message.chat.id,
+            message_id: query.message.message_id,
+            reply_markup: { inline_keyboard: view.button }
+        };
+        void this.bot.editMessageText(view.text, options);
+    }
+    async listCreateCallback(query, data) {
+        if (!query.message || !data[1])
+            return;
+        const user = await this.getUser(query.from.id);
+        if (!user || !user._id.equals(new mongodb_1.ObjectId(data[1])))
+            return;
+        const message = await this.queueSendMessage(query.message.chat.id, "Enter name for new playlist", {
+            reply_markup: {
+                force_reply: true,
+                selective: true
+            }
+        });
+        if (message instanceof Error)
+            throw message;
+        this.bot.onReplyToMessage(message.chat.id, message.message_id, async (reply) => {
+            if (!reply.from || reply.from.id !== query.from.id)
+                return;
+            if (reply.text) {
+                await this.list.create(reply.text, user._id);
+                void this.queueSendMessage(reply.chat.id, "Success!", {
+                    reply_to_message_id: reply.message_id
+                });
+            }
+            else {
+                void this.queueSendMessage(reply.chat.id, "Invalid name!");
+            }
+            this.bot.removeReplyListener(message.message_id);
+        });
+    }
+    async listAudioAddCallback(query, data) {
+        if (!query.message || !data[1])
+            return;
+        const list = await this.list.get(new mongodb_1.ObjectId(data[1]));
+        const user = await this.getUser(query.from.id);
+        if (!user || !list || !(list.owner.equals(user._id) || list.admin.find(id => id.equals(user._id))))
+            return;
+        if (data[2] === "done") {
+            this.audioAddSession.delete(query.message.chat.id);
+            void this.bot.editMessageText("Now this list have " + list.audio.length.toString() + " sounds!", { chat_id: query.message.chat.id, message_id: query.message.message_id });
+        }
+        else {
+            this.audioAddSession.set(query.message.chat.id, list._id);
+            void this.queueSendMessage(query.message.chat.id, "Send me audio file or sound ID you want add to list " + list.name, {
+                reply_markup: { inline_keyboard: [[{ text: "Done", callback_data: `ListAudioAdd ${list._id.toHexString()} done` }]] }
+            });
+        }
+    }
+    async listAudioDeleteCallback(query, data) {
+        if (!query.message || data.length < 3)
+            return;
+        if (data[3]) {
+            await this.list.delAudio(new mongodb_1.ObjectId(data[1]), new mongodb_1.ObjectId(data[2]));
+            void this.bot.editMessageReplyMarkup({ inline_keyboard: [[{ text: "Deleted", callback_data: "dummy" }]] }, { chat_id: query.message.chat.id, message_id: query.message.message_id });
+        }
+        else {
+            const audioID = new mongodb_1.ObjectId(data[2]);
+            const list = await this.list.get(new mongodb_1.ObjectId(data[1]));
+            const audio = await this.audio.get(audioID);
+            if (!list || !audio || !list.audio.find(id => id.equals(audioID)))
+                return;
+            void this.bot.sendMessage(query.message.chat.id, `Are you sure delete ${audio.title} from list ${list.name}?`, {
+                reply_markup: { inline_keyboard: [[{ text: "Yes", callback_data: `ListAudioDel ${data[1]} ${data[2]} y` }]] }
+            });
+        }
+    }
+    async listAudioCallback(query, data) {
+        if (!query.message || data.length < 3)
+            return;
+        const view = await this.genAudioListView(new mongodb_1.ObjectId(data[2]), parseInt(data[3], 10) || 0, data[1] === "delete");
+        if (!view)
+            return;
+        if (view.button) {
+            void this.bot.editMessageText(view.text, {
+                chat_id: query.message.chat.id,
+                message_id: query.message.message_id,
+                reply_markup: { inline_keyboard: view.button }
+            });
+        }
+        else {
+            void this.bot.editMessageText(view.text, {
+                chat_id: query.message.chat.id,
+                message_id: query.message.message_id
+            });
+        }
+    }
+    async AddAdminCallback(query, data) {
+        if (!query.message || !data[1])
+            return;
+        const list = await this.list.get(new mongodb_1.ObjectId(data[1]));
+        const user = await this.getUser(query.from.id);
+        if (!user || !list || !list.owner.equals(user._id))
+            return;
+        const message = await this.queueSendMessage(query.message.chat.id, "Enter user's ID to add admin", {
+            reply_markup: {
+                force_reply: true,
+                selective: true,
+            }
+        });
+        if (message instanceof Error)
+            throw message;
+        this.bot.onReplyToMessage(message.chat.id, message.message_id, async (reply) => {
+            if (!reply.from || reply.from.id !== query.from.id)
+                return;
+            if (reply.text) {
+                if (!mongodb_1.ObjectId.isValid(reply.text)) {
+                    void this.queueSendMessage(reply.chat.id, "ID Invalid!");
+                }
+                else if (reply.text === user._id.toHexString()) {
+                    void this.queueSendMessage(reply.chat.id, "You are adding your self!");
+                }
+                else {
+                    const userToAdd = await this.user.get(new mongodb_1.ObjectId(reply.text));
+                    if (!userToAdd) {
+                        void this.queueSendMessage(reply.chat.id, "User not found!");
+                    }
