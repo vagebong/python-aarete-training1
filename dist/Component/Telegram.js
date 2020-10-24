@@ -561,3 +561,119 @@ class Telegram {
                 });
             }
         }
+        return {
+            button: (button.length > 0) ? button : null,
+            text: ((deleteMode) ? "Choose sound to delete:\n" : "Sound list:\n") +
+                audio.map((item, index) => (item) ? `${start + index + 1}. ${item.title} ${(item.artist) ? `(${item.artist})` : ""}` : item).join("\n")
+        };
+    }
+    async processAudio(msg) {
+        if (!msg.from || !msg.audio)
+            return;
+        const sender = await this.getUser(msg.from.id);
+        if (!sender) {
+            this.sendError(msg, ERR_NOT_REGISTER);
+            return;
+        }
+        const source = "tg://" + msg.audio.file_id;
+        const replyMessage = await this.sendProcessing(msg);
+        if (replyMessage instanceof Error)
+            throw replyMessage;
+        if (msg.audio && msg.audio.title) {
+            try {
+                const audio = await this.audio.add(sender._id, source, {
+                    artist: msg.audio.performer,
+                    duration: msg.audio.duration,
+                    title: msg.audio.title
+                });
+                if (audio)
+                    await this.processDone(replyMessage, audio);
+            }
+            catch (e) {
+                this.sendError(replyMessage, `An error occured when adding song: ${e.message}`);
+            }
+        }
+        else {
+            let audio = await this.audio.search({ source }).next();
+            if (!audio) {
+                let title;
+                try {
+                    title = await (0, PromiseUtils_1.retry)(() => this.sendNeedTitle(msg), 3);
+                }
+                catch (error) {
+                    return;
+                }
+                audio = await this.audio.add(sender._id, source, {
+                    artist: msg.audio.performer,
+                    duration: msg.audio.duration,
+                    title
+                });
+            }
+            if (audio)
+                await this.processDone(replyMessage, audio);
+        }
+    }
+    async processFile(msg) {
+        if (!msg.from || !msg.document)
+            return;
+        const sender = await this.getUser(msg.from.id);
+        if (!sender) {
+            this.sendError(msg, ERR_NOT_REGISTER);
+            return;
+        }
+        const source = "tg://" + msg.document.file_id;
+        const replyMessage = await this.sendProcessing(msg);
+        let audio;
+        if (replyMessage instanceof Error)
+            throw replyMessage;
+        try {
+            audio = await this.audio.add(sender._id, source);
+        }
+        catch (error) {
+            if (error === AudioManager_1.ERR_MISSING_TITLE) {
+                try {
+                    const title = await (0, PromiseUtils_1.retry)(() => this.sendNeedTitle(msg, msg.document.file_name), 3);
+                    audio = await this.audio.add(sender._id, source, { title });
+                }
+                catch (error) {
+                    this.sendError(replyMessage, `Failed to process the file: ${error.message}`);
+                }
+            }
+            else {
+                this.sendError(replyMessage, `Failed to process the file: ${error.message}`);
+            }
+        }
+        if (audio)
+            await this.processDone(replyMessage, audio);
+    }
+    async processLink(msg, link) {
+        if (msg.from == null)
+            return;
+        link = encodeURI(decodeURIComponent(new url_1.URL(link).href));
+        const sender = await this.getUser(msg.from.id);
+        let audio;
+        if (!sender) {
+            this.sendError(msg, ERR_NOT_REGISTER);
+            return;
+        }
+        try {
+            audio = await this.audio.add(sender._id, link);
+        }
+        catch (error) {
+            if (error === AudioManager_1.ERR_MISSING_TITLE) {
+                try {
+                    const title = await (0, PromiseUtils_1.retry)(() => this.sendNeedTitle(msg, (0, path_1.basename)((0, url_1.parse)(decodeURI(link)).pathname)), 3);
+                    audio = await this.audio.add(sender._id, link, { title });
+                }
+                catch (error) {
+                    this.sendError(msg, `Failed to process the link ${link}: ${error.message}`);
+                }
+            }
+            else {
+                this.sendError(msg, `Failed to process the link ${link}: ${error.message}`);
+            }
+        }
+        if (audio)
+            await this.processDone(msg, audio);
+    }
+    async sendProcessing(msg) {
