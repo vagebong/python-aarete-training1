@@ -98,3 +98,74 @@ class AudioManager {
     }
     async delete(id) {
         if (!this.database)
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        const audio = await this.get(id);
+        if (!audio)
+            return;
+        await this.listManager.delAudioAll(id);
+        const file = this.getCachePath(audio);
+        if (await (0, PromiseUtils_1.exists)(file))
+            await fs_1.promises.unlink(file);
+        return this.database.deleteOne({ _id: id });
+    }
+    get(id) {
+        if (!this.database)
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        return (0, PromiseUtils_1.retry)(() => this.database.findOne({ _id: id }), 17280, 5000, false);
+    }
+    search(metadata) {
+        if (!this.database)
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        return metadata === undefined ? this.database.find() : this.database.find(metadata);
+    }
+    async getFile(audio) {
+        const path = this.getCachePath(audio);
+        return await (0, PromiseUtils_1.exists)(path) ? path : false;
+    }
+    async checkCache(deep = false) {
+        if (deep)
+            console.log("[Audio] Starting deep cache check...");
+        for await (const audio of this.search()) {
+            if (audio == null)
+                return;
+            const file = this.getCachePath(audio);
+            if (!await (0, PromiseUtils_1.exists)(file)) {
+                if (!audio.source) {
+                    void this.delete(audio._id);
+                    return;
+                }
+                console.log(`[Audio] ${audio.title} missing in cache, redownload..`);
+                try {
+                    const source = await this.urlParser.getFile(audio.source);
+                    await (0, PromiseUtils_1.retry)(() => this.encodeQueue.add(async () => this.encode(source, audio.hash, audio.duration)));
+                }
+                catch (e) {
+                    console.error(`Failed to download ${audio.title}`, e.message);
+                    void this.delete(audio._id);
+                }
+            }
+            else if (deep) {
+                const metadata = this.metadataQueue.add(() => this.urlParser.getMetadata(file));
+                if (Math.abs((await metadata).duration - audio.duration) > 1) {
+                    if (!audio.source) {
+                        void this.delete(audio._id);
+                        return;
+                    }
+                    console.log(`[Audio] ${audio.title} cache damaged, redownload...`);
+                    try {
+                        const source = await this.urlParser.getFile(audio.source);
+                        await (0, PromiseUtils_1.retry)(() => this.encodeQueue.add(() => this.encode(source, audio.hash, audio.duration)));
+                    }
+                    catch (e) {
+                        console.error(`Failed to download ${audio.title}`, e.message);
+                        void this.delete(audio._id);
+                    }
+                }
+            }
+        }
+    }
+    getCachePath(audio) {
+        return (0, path_1.resolve)(this.config.save, audio.hash + ".ogg");
+    }
+}
+exports.AudioManager = AudioManager;
