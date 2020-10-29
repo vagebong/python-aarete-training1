@@ -6,4 +6,8 @@ const PromiseUtils_1 = require("./Utils/PromiseUtils");
 class ListManager {
     constructor(core) {
         core.on("init", () => {
-        
+            this.audioManager = core.audioManager;
+        });
+        core.on("ready", () => {
+            if (!this.audioManager)
+                th
