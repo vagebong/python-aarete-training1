@@ -10,4 +10,6 @@ class ListManager {
         });
         core.on("ready", () => {
             if (!this.audioManager)
-                th
+                throw Error("AudioManager not init");
+            if (!core.database.client)
+                throw Error("Datab
