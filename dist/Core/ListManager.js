@@ -20,4 +20,7 @@ class ListManager {
         });
     }
     async create(name, owner) {
-        if (!th
+        if (!this.database)
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        await this.database.insertOne({
+            
