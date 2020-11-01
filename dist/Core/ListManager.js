@@ -15,4 +15,9 @@ class ListManager {
                 throw Error("Database client not init");
             this.database = core.database.client.collection("list");
             void this.database.updateMany({ admin: { $exists: false } }, { $set: { admin: [] } });
-            void this.database.createIndex({ owner: 1 })
+            void this.database.createIndex({ owner: 1 });
+            void this.database.createIndex({ admin: 1 });
+        });
+    }
+    async create(name, owner) {
+        if (!th
