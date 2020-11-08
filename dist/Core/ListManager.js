@@ -23,4 +23,11 @@ class ListManager {
         if (!this.database)
             throw MongoDB_1.ERR_DB_NOT_INIT;
         await this.database.insertOne({
-            
+            admin: Array(),
+            audio: Array(),
+            name,
+            owner
+        });
+    }
+    get(id) {
+     
