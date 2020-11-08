@@ -30,4 +30,6 @@ class ListManager {
         });
     }
     get(id) {
-     
+        if (!this.database)
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        return (0, PromiseUtils_1.retry)(() => this.databas
