@@ -36,4 +36,8 @@ class ListManager {
     }
     getAll() {
         if (!this.database)
-           
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        return this.database.find();
+    }
+    getFromPermission(user) {
+       
