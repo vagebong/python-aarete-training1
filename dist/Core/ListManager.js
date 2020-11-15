@@ -42,4 +42,8 @@ class ListManager {
     getFromPermission(user) {
         if (!this.database)
             throw MongoDB_1.ERR_DB_NOT_INIT;
-        return this.database.find
+        return this.database.find({ $or: [{ owner: user }, { admin: user }] });
+    }
+    async rename(id, name) {
+        if (!this.database)
+            throw Mo
