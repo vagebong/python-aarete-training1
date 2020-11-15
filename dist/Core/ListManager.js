@@ -46,4 +46,5 @@ class ListManager {
     }
     async rename(id, name) {
         if (!this.database)
-            throw Mo
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        return (await this.database.findOneAndUpdate({ _id: id }, { $set: { name } }, {
