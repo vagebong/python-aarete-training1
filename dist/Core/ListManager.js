@@ -54,4 +54,7 @@ class ListManager {
             throw MongoDB_1.ERR_DB_NOT_INIT;
         await this.database.deleteOne({ _id: id });
     }
-    async addAdmin(id, admin)
+    async addAdmin(id, admin) {
+        if (!this.database)
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        return (await this.database.findOneAndUpdate
