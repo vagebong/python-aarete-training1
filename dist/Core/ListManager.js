@@ -57,4 +57,6 @@ class ListManager {
     async addAdmin(id, admin) {
         if (!this.database)
             throw MongoDB_1.ERR_DB_NOT_INIT;
-        return (await this.database.findOneAndUpdate
+        return (await this.database.findOneAndUpdate({ _id: id }, { $addToSet: { admin } }, { returnDocument: "after" })).value;
+    }
+    async removeAdmi
