@@ -62,4 +62,6 @@ class ListManager {
     async removeAdmin(id, admin) {
         if (!this.database)
             throw MongoDB_1.ERR_DB_NOT_INIT;
-        return (await this
+        return (await this.database.findOneAndUpdate({ _id: id }, { $pull: { admin } }, { returnDocument: "after" })).value;
+    }
+    async addAu
