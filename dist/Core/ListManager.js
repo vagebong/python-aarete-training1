@@ -64,4 +64,7 @@ class ListManager {
             throw MongoDB_1.ERR_DB_NOT_INIT;
         return (await this.database.findOneAndUpdate({ _id: id }, { $pull: { admin } }, { returnDocument: "after" })).value;
     }
-    async addAu
+    async addAudio(id, audio) {
+        if (!this.database)
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        return (await this.
