@@ -67,4 +67,6 @@ class ListManager {
     async addAudio(id, audio) {
         if (!this.database)
             throw MongoDB_1.ERR_DB_NOT_INIT;
-        return (await this.
+        return (await this.database.findOneAndUpdate({ _id: id }, { $addToSet: { audio } }, { returnDocument: "after" })).value;
+    }
+    async delAudio(id, audio) {
