@@ -75,4 +75,6 @@ class ListManager {
         return (await this.database.findOneAndUpdate({ _id: id }, { $pull: { audio } }, { returnDocument: "after" })).value;
     }
     async delAudioAll(audio) {
-        if (!th
+        if (!this.database)
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        return this.database.updateMany({}, { $pull: 
