@@ -77,4 +77,8 @@ class ListManager {
     async delAudioAll(audio) {
         if (!this.database)
             throw MongoDB_1.ERR_DB_NOT_INIT;
-        return this.database.updateMany({}, { $pull: 
+        return this.database.updateMany({}, { $pull: { audio } });
+    }
+    async checkAudioExist() {
+        await this.getAll().forEach(list => {
+            list.au
