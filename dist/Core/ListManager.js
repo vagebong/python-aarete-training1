@@ -81,4 +81,6 @@ class ListManager {
     }
     async checkAudioExist() {
         await this.getAll().forEach(list => {
-            list.au
+            list.audio.forEach(async (audio) => {
+                if (!await this.audioManager.get(audio))
+                   
