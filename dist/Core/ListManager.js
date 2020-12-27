@@ -88,4 +88,7 @@ class ListManager {
         });
     }
     async audioInList(audio) {
-        return 
+        return this.searchListFromAudio(audio).hasNext();
+    }
+    searchListFromAudio(audio) {
+        if (!this.datab
