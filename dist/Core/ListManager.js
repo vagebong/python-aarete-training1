@@ -96,4 +96,4 @@ class ListManager {
         return this.database.find({ audio });
     }
 }
-export
+exports.ListManager = ListManager;
