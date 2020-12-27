@@ -91,4 +91,9 @@ class ListManager {
         return this.searchListFromAudio(audio).hasNext();
     }
     searchListFromAudio(audio) {
-        if (!this.datab
+        if (!this.database)
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        return this.database.find({ audio });
+    }
+}
+export
