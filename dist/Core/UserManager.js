@@ -6,4 +6,7 @@ const MongoDB_1 = require("./MongoDB");
 exports.ERR_USER_EXIST = Error("User exist");
 exports.ERR_BIND_TOKEN_NOT_FOUND = Error("Bind token not found");
 class UserManager {
-    constructor(core)
+    constructor(core) {
+        this.bindToken = new Map();
+        core.on("ready", () => {
+            if (!core.database.client
