@@ -9,4 +9,7 @@ class UserManager {
     constructor(core) {
         this.bindToken = new Map();
         core.on("ready", () => {
-            if (!core.database.client
+            if (!core.database.client)
+                throw Error("Database client not init");
+            this.database = core.database.client.collection("user");
+   
