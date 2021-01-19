@@ -13,4 +13,9 @@ class UserManager {
                 throw Error("Database client not init");
             this.database = core.database.client.collection("user");
             void this.database.createIndex({ "bind.type": 1, "bind.id": 1 }, { unique: true });
-        }
+        });
+    }
+    get(id) {
+        if (!this.database)
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        return this.database.findO
