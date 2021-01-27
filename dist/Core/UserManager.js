@@ -18,4 +18,8 @@ class UserManager {
     get(id) {
         if (!this.database)
             throw MongoDB_1.ERR_DB_NOT_INIT;
-        return this.database.findO
+        return this.database.findOne({ _id: id });
+    }
+    getFromBind(type, id) {
+        if (!this.database)
+            throw MongoDB_1
