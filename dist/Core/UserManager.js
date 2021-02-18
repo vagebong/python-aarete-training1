@@ -26,4 +26,6 @@ class UserManager {
         return this.database.findOne({ bind: { $elemMatch: { type, id } } });
     }
     async create(name, bind) {
-  
+        if (!this.database)
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        if (await this.getFromBind(b
