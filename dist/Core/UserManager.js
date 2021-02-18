@@ -28,4 +28,6 @@ class UserManager {
     async create(name, bind) {
         if (!this.database)
             throw MongoDB_1.ERR_DB_NOT_INIT;
-        if (await this.getFromBind(b
+        if (await this.getFromBind(bind.type, bind.id))
+            throw exports.ERR_USER_EXIST;
+        return this.bind((await this.database.insertOne({ n
