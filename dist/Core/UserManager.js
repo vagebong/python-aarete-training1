@@ -36,4 +36,9 @@ class UserManager {
         const id = this.bindToken.get(token);
         if (!id)
             throw exports.ERR_BIND_TOKEN_NOT_FOUND;
-        if (await this.getFromBind(bind.type,
+        if (await this.getFromBind(bind.type, bind.id))
+            throw exports.ERR_USER_EXIST;
+        return this.bind(id, bind);
+    }
+    delete(id) {
+      
