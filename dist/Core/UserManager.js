@@ -34,4 +34,6 @@ class UserManager {
     }
     async createFromToken(token, bind) {
         const id = this.bindToken.get(token);
-       
+        if (!id)
+            throw exports.ERR_BIND_TOKEN_NOT_FOUND;
+        if (await this.getFromBind(bind.type,
