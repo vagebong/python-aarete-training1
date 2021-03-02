@@ -44,3 +44,7 @@ class UserManager {
         if (!this.database)
             throw MongoDB_1.ERR_DB_NOT_INIT;
         return this.database.deleteOne({ _id: id });
+    }
+    createBindToken(id) {
+        const token = (0, crypto_1.randomBytes)(20).toString("hex");
+        this.bindToken.se
