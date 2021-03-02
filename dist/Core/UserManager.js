@@ -41,4 +41,6 @@ class UserManager {
         return this.bind(id, bind);
     }
     delete(id) {
-      
+        if (!this.database)
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        return this.database.deleteOne({ _id: id });
