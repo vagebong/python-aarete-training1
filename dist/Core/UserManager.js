@@ -51,4 +51,7 @@ class UserManager {
         setInterval(() => this.bindToken.delete(token), 60 * 60 * 1000);
         return token;
     }
-    async bind(
+    async bind(id, bind) {
+        if (!this.database)
+            throw MongoDB_1.ERR_DB_NOT_INIT;
+        return (await this.database.findOneAnd
