@@ -47,4 +47,8 @@ class UserManager {
     }
     createBindToken(id) {
         const token = (0, crypto_1.randomBytes)(20).toString("hex");
-        this.bindToken.se
+        this.bindToken.set(token, id);
+        setInterval(() => this.bindToken.delete(token), 60 * 60 * 1000);
+        return token;
+    }
+    async bind(
