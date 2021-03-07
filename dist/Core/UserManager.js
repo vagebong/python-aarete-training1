@@ -54,4 +54,7 @@ class UserManager {
     async bind(id, bind) {
         if (!this.database)
             throw MongoDB_1.ERR_DB_NOT_INIT;
-        return (await this.database.findOneAnd
+        return (await this.database.findOneAndUpdate({ _id: id }, { $addToSet: { bind } }, { returnDocument: "after" })).value;
+    }
+}
+exports.UserManager = UserManager;
