@@ -10,4 +10,8 @@ try {
 catch (err) {
     ffprobe = require("@ffprobe-installer/ffprobe").path;
 }
-async function ge
+async function getMediaInfo(file) {
+    const ffprobeOption = [
+        "-v", "error",
+        "-of", "default=nw=1",
+        "-s
