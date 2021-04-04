@@ -5,4 +5,9 @@ const child_process_1 = require("child_process");
 let ffprobe;
 try {
     (0, child_process_1.execFileSync)("ffprobe", ["-version"], { stdio: "ignore" });
-    
+    ffprobe = "ffprobe";
+}
+catch (err) {
+    ffprobe = require("@ffprobe-installer/ffprobe").path;
+}
+async function ge
