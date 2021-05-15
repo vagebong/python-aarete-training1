@@ -22,4 +22,5 @@ async function getMediaInfo(file) {
         windowsHide: true
     };
     return new Promise((resolve, reject) => {
-       
+        (0, child_process_1.execFile)(ffprobe, ffprobeOption, execOption, (err, stdout) => {
+            if
