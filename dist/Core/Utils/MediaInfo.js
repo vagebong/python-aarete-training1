@@ -17,4 +17,9 @@ async function getMediaInfo(file) {
         "-show_entries", "stream_tags=title,artist:format_tags=title,artist:format=duration,size",
         file,
     ];
-    const exec
+    const execOption = {
+        timeout: 30000,
+        windowsHide: true
+    };
+    return new Promise((resolve, reject) => {
+       
