@@ -14,4 +14,7 @@ async function getMediaInfo(file) {
     const ffprobeOption = [
         "-v", "error",
         "-of", "default=nw=1",
-        "-s
+        "-show_entries", "stream_tags=title,artist:format_tags=title,artist:format=duration,size",
+        file,
+    ];
+    const exec
