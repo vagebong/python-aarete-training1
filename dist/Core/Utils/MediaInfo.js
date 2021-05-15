@@ -23,4 +23,8 @@ async function getMediaInfo(file) {
     };
     return new Promise((resolve, reject) => {
         (0, child_process_1.execFile)(ffprobe, ffprobeOption, execOption, (err, stdout) => {
-            if
+            if (err) {
+                reject(err);
+                return;
+            }
+            const durationMatch = /duration=(.*)/i
