@@ -27,4 +27,6 @@ async function getMediaInfo(file) {
                 reject(err);
                 return;
             }
-            const durationMatch = /duration=(.*)/i
+            const durationMatch = /duration=(.*)/i.exec(stdout);
+            const sizeMatch = /size=(.*)/i.exec(stdout);
+            const titleMatch = /TAG:title=(.*)/i.exec
