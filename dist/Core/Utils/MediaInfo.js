@@ -29,4 +29,6 @@ async function getMediaInfo(file) {
             }
             const durationMatch = /duration=(.*)/i.exec(stdout);
             const sizeMatch = /size=(.*)/i.exec(stdout);
-            const titleMatch = /TAG:title=(.*)/i.exec
+            const titleMatch = /TAG:title=(.*)/i.exec(stdout);
+            const artistMatch = /TAG:artist=(.*)/i.exec(stdout);
+            const title = (titleMatch) ? titleMat
