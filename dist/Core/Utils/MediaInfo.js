@@ -33,4 +33,5 @@ async function getMediaInfo(file) {
             const artistMatch = /TAG:artist=(.*)/i.exec(stdout);
             const title = (titleMatch) ? titleMatch[1] : undefined;
             const artist = (artistMatch) ? artistMatch[1] : undefined;
-            const duration = (
+            const duration = (durationMatch && durationMatch[1] !== "N/A") ? Math.round(Number(durationMatch[1])) : undefined;
+            const size = (
