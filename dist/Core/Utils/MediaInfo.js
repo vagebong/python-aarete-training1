@@ -36,4 +36,10 @@ async function getMediaInfo(file) {
             const duration = (durationMatch && durationMatch[1] !== "N/A") ? Math.round(Number(durationMatch[1])) : undefined;
             const size = (sizeMatch && sizeMatch[1] !== "N/A") ? sizeMatch[1] : undefined;
             resolve({
-        
+                artist,
+                duration,
+                size,
+                title
+            });
+        });
+    
