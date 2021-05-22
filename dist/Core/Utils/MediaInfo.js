@@ -42,4 +42,6 @@ async function getMediaInfo(file) {
                 title
             });
         });
-    
+    });
+}
+exports.getMediaInfo = getMediaInfo;
