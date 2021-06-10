@@ -8,4 +8,6 @@ const Discord_1 = require("./Component/Discord");
 const Telegram_1 = require("./Component/Telegram");
 const AudioManager_1 = require("./Core/AudioManager");
 const ListManager_1 = require("./Core/ListManager");
-co
+const MongoDB_1 = require("./Core/MongoDB");
+const UserManager_1 = require("./Core/UserManager");
+class C
