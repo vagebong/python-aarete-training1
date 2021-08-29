@@ -10,4 +10,7 @@ const AudioManager_1 = require("./Core/AudioManager");
 const ListManager_1 = require("./Core/ListManager");
 const MongoDB_1 = require("./Core/MongoDB");
 const UserManager_1 = require("./Core/UserManager");
-class C
+class Core extends events_1.EventEmitter {
+    constructor() {
+        super();
+        this.config = require((0, path_1.re
