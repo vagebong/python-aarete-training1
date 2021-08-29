@@ -15,4 +15,6 @@ class Core extends events_1.EventEmitter {
         super();
         this.config = require((0, path_1.resolve)("config.json"));
         this.audioManager = new AudioManager_1.AudioManager(this);
-        this.userM
+        this.userManager = new UserManager_1.UserManager(this);
+        this.listManager = new ListManager_1.ListManager(this);
+        this.database = new
