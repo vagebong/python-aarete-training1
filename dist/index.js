@@ -13,4 +13,6 @@ const UserManager_1 = require("./Core/UserManager");
 class Core extends events_1.EventEmitter {
     constructor() {
         super();
-        this.config = require((0, path_1.re
+        this.config = require((0, path_1.resolve)("config.json"));
+        this.audioManager = new AudioManager_1.AudioManager(this);
+        this.userM
