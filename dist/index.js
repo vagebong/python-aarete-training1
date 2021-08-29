@@ -17,4 +17,6 @@ class Core extends events_1.EventEmitter {
         this.audioManager = new AudioManager_1.AudioManager(this);
         this.userManager = new UserManager_1.UserManager(this);
         this.listManager = new ListManager_1.ListManager(this);
-        this.database = new
+        this.database = new MongoDB_1.MongoDB(this.config);
+        this.emit("init", this);
+        if (!(0, fs_1.existsSync)((0, path_1.reso
