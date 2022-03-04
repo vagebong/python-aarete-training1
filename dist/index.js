@@ -23,4 +23,8 @@ class Core extends events_1.EventEmitter {
             (0, fs_1.mkdirSync)((0, path_1.resolve)(this.config.audio.save));
         this.database.on("connect", () => this.emit("ready"));
         this.on("ready", async () => {
-            console.log("[Main] I
+            console.log("[Main] Init components...");
+            try {
+                new Telegram_1.Telegram(this);
+            }
+            catch (
