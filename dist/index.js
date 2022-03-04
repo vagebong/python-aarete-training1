@@ -21,4 +21,6 @@ class Core extends events_1.EventEmitter {
         this.emit("init", this);
         if (!(0, fs_1.existsSync)((0, path_1.resolve)(this.config.audio.save)))
             (0, fs_1.mkdirSync)((0, path_1.resolve)(this.config.audio.save));
-        this
+        this.database.on("connect", () => this.emit("ready"));
+        this.on("ready", async () => {
+            console.log("[Main] I
