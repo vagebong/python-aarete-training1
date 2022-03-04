@@ -27,4 +27,10 @@ class Core extends events_1.EventEmitter {
             try {
                 new Telegram_1.Telegram(this);
             }
-            catch (
+            catch (error) {
+                console.error(error);
+            }
+            try {
+                new Discord_1.Discord(this);
+            }
+  
