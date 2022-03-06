@@ -38,4 +38,5 @@ class Core extends events_1.EventEmitter {
             }
             await this.audioManager.checkCache(process.argv.indexOf("--deep-check") !== -1);
             await this.listManager.checkAudioExist();
-           
+            if (process.argv.indexOf("--cleanup-audio") !== -1) {
+                console.log("[Cleanup] Starting clean up audio not in any list");
