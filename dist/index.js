@@ -33,4 +33,7 @@ class Core extends events_1.EventEmitter {
             try {
                 new Discord_1.Discord(this);
             }
-  
+            catch (error) {
+                console.error(error);
+            }
+            await this.audioManager.ch
