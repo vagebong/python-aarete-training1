@@ -36,4 +36,6 @@ class Core extends events_1.EventEmitter {
             catch (error) {
                 console.error(error);
             }
-            await this.audioManager.ch
+            await this.audioManager.checkCache(process.argv.indexOf("--deep-check") !== -1);
+            await this.listManager.checkAudioExist();
+           
