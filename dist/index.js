@@ -46,3 +46,10 @@ class Core extends events_1.EventEmitter {
                         await this.audioManager.delete(audio._id);
                     }
                 }
+            }
+        });
+    }
+}
+exports.Core = Core;
+process.on('unhandledRejection', (reason, promise) => {
+    console.error(
