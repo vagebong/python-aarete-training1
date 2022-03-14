@@ -42,4 +42,7 @@ class Core extends events_1.EventEmitter {
                 console.log("[Cleanup] Starting clean up audio not in any list");
                 for await (const audio of this.audioManager.search()) {
                     if (audio && !await this.listManager.audioInList(audio._id)) {
-                        console.log(`[Cleanup] Delete ${audio.title} not
+                        console.log(`[Cleanup] Delete ${audio.title} not in any list`);
+                        await this.audioManager.delete(audio._id);
+                    }
+                }
