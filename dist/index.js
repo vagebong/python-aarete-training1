@@ -57,4 +57,4 @@ process.on('unhandledRejection', (reason, promise) => {
 process.on('SIGINT', () => {
     process.exit();
 });
-new Cor
+new Core();
