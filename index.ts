@@ -6,4 +6,7 @@ import { Telegram } from "./Component/Telegram";
 import { AudioManager } from "./Core/AudioManager";
 import { ListManager } from "./Core/ListManager";
 import { MongoDB } from "./Core/MongoDB";
-import { U
+import { UserManager } from "./Core/UserManager";
+
+export class Core extends EventEmitter {
+    public readonly config = require(resolve("co
