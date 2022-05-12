@@ -9,4 +9,7 @@ import { MongoDB } from "./Core/MongoDB";
 import { UserManager } from "./Core/UserManager";
 
 export class Core extends EventEmitter {
-    public readonly config = require(resolve("co
+    public readonly config = require(resolve("config.json"));
+    public readonly audioManager = new AudioManager(this);
+    public readonly userManager = new UserManager(this);
+  
