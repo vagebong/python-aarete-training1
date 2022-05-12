@@ -12,4 +12,7 @@ export class Core extends EventEmitter {
     public readonly config = require(resolve("config.json"));
     public readonly audioManager = new AudioManager(this);
     public readonly userManager = new UserManager(this);
-  
+    public readonly listManager = new ListManager(this);
+    public readonly database = new MongoDB(this.config);
+
+    
