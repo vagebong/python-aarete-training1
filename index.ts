@@ -15,4 +15,9 @@ export class Core extends EventEmitter {
     public readonly listManager = new ListManager(this);
     public readonly database = new MongoDB(this.config);
 
-    
+    constructor() {
+        super();
+
+        this.emit("init", this);
+
+        if (!existsSync(resolve(this.config.audio.save as stri
