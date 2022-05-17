@@ -23,4 +23,7 @@ export class Core extends EventEmitter {
         if (!existsSync(resolve(this.config.audio.save as string))) mkdirSync(resolve(this.config.audio.save as string));
 
         // Wait DB connect
-        this.dat
+        this.database.on("connect", () => this.emit("ready"));
+
+        this.on("ready", async () => {
+            
