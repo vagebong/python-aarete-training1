@@ -32,4 +32,9 @@ export class Core extends EventEmitter {
                 // tslint:disable-next-line:no-unused-expression
                 new Telegram(this);
             } catch (error) {
-                console.error(erro
+                console.error(error);
+            }
+
+            try {
+                // tslint:disable-next-line:no-unused-expression
+         
