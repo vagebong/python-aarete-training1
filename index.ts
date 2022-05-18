@@ -29,4 +29,7 @@ export class Core extends EventEmitter {
             console.log("[Main] Init components...");
 
             try {
-                // tslint:disable-next-line:no-unuse
+                // tslint:disable-next-line:no-unused-expression
+                new Telegram(this);
+            } catch (error) {
+                console.error(erro
