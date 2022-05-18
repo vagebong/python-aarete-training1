@@ -26,4 +26,7 @@ export class Core extends EventEmitter {
         this.database.on("connect", () => this.emit("ready"));
 
         this.on("ready", async () => {
-            
+            console.log("[Main] Init components...");
+
+            try {
+                // tslint:disable-next-line:no-unuse
