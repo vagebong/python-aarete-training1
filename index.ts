@@ -37,4 +37,9 @@ export class Core extends EventEmitter {
 
             try {
                 // tslint:disable-next-line:no-unused-expression
+                new Discord(this);
+            } catch (error) {
+                console.error(error);
+            }
+
          
