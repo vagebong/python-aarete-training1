@@ -43,4 +43,8 @@ export class Core extends EventEmitter {
             }
 
             // Check audio files and redownload missing files
-            await this.audioManager.checkCache(process.argv.indexOf("--deep-check") !==
+            await this.audioManager.checkCache(process.argv.indexOf("--deep-check") !== -1);
+            await this.listManager.checkAudioExist();
+
+            // Clean up audio not in any list
+            i
