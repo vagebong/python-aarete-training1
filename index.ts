@@ -47,4 +47,5 @@ export class Core extends EventEmitter {
             await this.listManager.checkAudioExist();
 
             // Clean up audio not in any list
-            i
+            if (process.argv.indexOf("--cleanup-audio") !== -1) {
+                console.log("[Cleanup] Starting clean u
