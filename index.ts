@@ -42,4 +42,5 @@ export class Core extends EventEmitter {
                 console.error(error);
             }
 
-         
+            // Check audio files and redownload missing files
+            await this.audioManager.checkCache(process.argv.indexOf("--deep-check") !==
