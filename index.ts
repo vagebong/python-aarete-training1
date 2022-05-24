@@ -50,4 +50,5 @@ export class Core extends EventEmitter {
             if (process.argv.indexOf("--cleanup-audio") !== -1) {
                 console.log("[Cleanup] Starting clean up audio not in any list")
                 for await (const audio of this.audioManager.search()) {
-                
+                    if (audio && !await this.listManager.audioInList(audio._id)) {
+                        console.log(`[Cleanup
