@@ -53,4 +53,12 @@ export class Core extends EventEmitter {
                     if (audio && !await this.listManager.audioInList(audio._id)) {
                         console.log(`[Cleanup] Delete ${audio.title} not in any list`)
                         await this.audioManager.delete(audio._id);
-   
+                    }
+                }
+            }
+        });
+    }
+}
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.
