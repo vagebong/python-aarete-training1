@@ -65,4 +65,8 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 process.on('SIGINT', () => {
-    process.exi
+    process.exit();
+});
+
+// tslint:disable-next-line:no-unused-expression
+new Core();
