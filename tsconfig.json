@@ -3,4 +3,5 @@
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
 
     /* Projects */
-    // "incre
+    // "incremental": true,                              /* Enable incremental compilation */
+    // "composite": true,                                /
