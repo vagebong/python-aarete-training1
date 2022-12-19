@@ -66,4 +66,4 @@
     // "declarationDir": "./",                           /* Specify the output directory for generated declaration files. */
 
     /* Interop Constraints */
-    
+    // "isolatedModules": true,                          /* Ensure that each file can be safely transpiled without relying on other impo
